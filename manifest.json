@@ -1,0 +1,21 @@
+{
+  "short_name": "HCG BLOGGER",
+  "name": "HCG BLOGGER - Intelligent Journal",
+  "icons": [
+    {
+      "src": "https://placehold.co/192x192/9333ea/ffffff.png?text=HCG",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://placehold.co/512x512/9333ea/ffffff.png?text=HCG",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#030303",
+  "background_color": "#030303",
+  "orientation": "portrait"
+}

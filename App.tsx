@@ -1,29 +1,61 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from './components/Header';
-import { CalendarSidebar } from './components/InputSection'; // Conceptually CalendarSidebar
-import { BlogView } from './components/ResultSection'; // Conceptually BlogView
+import { CalendarSidebar } from './components/InputSection'; 
+import { BlogView } from './components/ResultSection'; 
+import { AuthScreen } from './components/AuthScreen';
 import { BlogPost, DateStats } from './types';
 
 function App() {
+  const [user, setUser] = useState<string | null>(null);
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  // Load posts from localStorage on mount
+  // Check for existing session on mount
   useEffect(() => {
-    const saved = localStorage.getItem('chronicle_posts');
-    if (saved) {
-      try {
-        setPosts(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse posts", e);
-      }
+    const savedUser = localStorage.getItem('hcg_current_user');
+    if (savedUser) {
+      setUser(savedUser);
     }
   }, []);
 
-  // Save posts to localStorage whenever they change
+  // Load posts for specific user whenever user changes
   useEffect(() => {
-    localStorage.setItem('chronicle_posts', JSON.stringify(posts));
-  }, [posts]);
+    if (user) {
+      const saved = localStorage.getItem(`hcg_posts_${user}`);
+      if (saved) {
+        try {
+          setPosts(JSON.parse(saved));
+        } catch (e) {
+          console.error("Failed to parse posts", e);
+          setPosts([]);
+        }
+      } else {
+        setPosts([]);
+      }
+      setSelectedDate(null); // Reset selection on user change
+    } else {
+      setPosts([]);
+    }
+  }, [user]);
+
+  // Save posts to localStorage for specific user whenever posts change
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem(`hcg_posts_${user}`, JSON.stringify(posts));
+    }
+  }, [posts, user]);
+
+  // Login Handler
+  const handleLogin = (username: string) => {
+    setUser(username);
+    localStorage.setItem('hcg_current_user', username);
+  };
+
+  // Logout Handler
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('hcg_current_user');
+  };
 
   // Compute stats for calendar (how many posts per date)
   const stats: DateStats = useMemo(() => {
@@ -49,9 +81,13 @@ function App() {
     }
   };
 
+  if (!user) {
+    return <AuthScreen onLogin={handleLogin} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col selection:bg-purple-500 selection:text-white">
-      <Header />
+      <Header user={user} onLogout={handleLogout} />
 
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
@@ -80,7 +116,7 @@ function App() {
       
       <footer className="border-t border-white/5 py-10 mt-auto bg-black">
         <div className="container mx-auto px-6 text-center">
-            <p className="text-gray-600 text-sm">HCG BLOGGER stores all data locally in your browser.</p>
+            <p className="text-gray-600 text-sm">Logged in as <span className="text-purple-500 font-bold">{user}</span></p>
             <p className="text-gray-800 text-xs mt-2 font-mono">SECURE • PRIVATE • INTELLIGENT</p>
         </div>
       </footer>
