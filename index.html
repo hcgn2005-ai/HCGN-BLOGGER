@@ -14,10 +14,15 @@
     <link rel="manifest" href="./manifest.json" />
     
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Babel for in-browser compilation (Required for raw hosting) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
     <script type="importmap">
 {
   "imports": {
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react-dom/client": "https://aistudiocdn.com/react-dom@^19.2.0/client",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
@@ -67,6 +72,19 @@
 </head>
   <body class="bg-[#030303] text-gray-300 antialiased selection:bg-purple-600 selection:text-white overflow-y-scroll overscroll-none">
     <div id="root"></div>
+
+    <!-- Polyfill for process.env (prevents crash in browser) -->
+    <script>
+      window.process = {
+        env: {
+          API_KEY: '' // Provide your API Key here if hosting statically
+        }
+      };
+    </script>
+
+    <!-- Main Entry Point: Loads index.tsx via Babel -->
+    <script type="text/babel" data-presets="react,typescript" data-type="module" src="./index.tsx"></script>
+
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
